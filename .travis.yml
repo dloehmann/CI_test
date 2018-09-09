@@ -1,2 +1,37 @@
+sudo: required
 language: java
 jdk: oraclejdk8
+
+services:
+- docker
+
+env:
+  global:
+  - secure: "encrypted-sonar-token"
+  - secure:  "jj2+0cgwadqf4A+3DheeylFJGFxcUXHhZPs8Ei2AvzOtQorXS8TT1lJ7+0ATGOb4SQYtSppqekpSf6cZOuSxXTC3dLV7C5M6jzwpvngJYrMDgB0Gy7SLiQCiV7m2XpAqtTEtoyIcX0LT8jP2vQxkpttYlKO801moGfloo8ZqGTHJUJJ3sSeb5Np2mwn97tElOYwhHuVcjK+CPczqbdp8cWE/aORtZ1JbNrf5tikzNzS6UvhMKb10zR3JCCCrHY04JH9iya2aRd6+uNi5J5PVXccqhXbVLY64yiF0ifiEpX2Lz59ZQnstyD0XTQP1+HLN+blD0o/zS8qkBibWqgbVGB0vwXjzquIbvfsGXHmH5OERAdvH5x3mYjBderT9RHiJXXIVhFqEHNv+/X7snYeQlezgDBPkurQDncJO2Y78HfMrbxQesgPN5afIOPel1+sMA68IpCChUmdhi4cJ6e8WOyGuWGB4LQsa1D3ABq8ca9xOZLJhU4lg4MYFfzSXxtyIuKc2aDFL7NobgfjFbAkXm/FR4rRyDq0HnpYhOaw3CKzNAtmRsU1GUxARbUWZzJpKxIOeoYa6DS6UdW1OfdT66JGhrKpVVYf7sk3gsVoUGyoSGZcmiaSaBIHplJYWdyAL1BL2+eJc/fzzMSpqRRD4RP4K71y27zEDQaxkn0w6Qj0="
+  - secure: "H6bEFFUKiCq9jZpCuXYfZDTXGIHMtXZnLfrVcwiGdhjGS33R4/dhMWqFuI3RtV3almeo3kDDbZyKgVRNQTQwSJJ+MF2Eh1qjTAjPDZecqoFTp+ZjGRMy2P2T4UHU+XhIS+wSHX8mbOqICKsd+jPFhB6U0OnXolvnWIF5qd/jQGLiD0yrdEnJT1IVx+cJpdIILJB1n9JMm8rn1JKi45yTKPCmnokvVuCwuPo8+kAbbRtvEtU/C0R0meQ26ov22doY2PPXDjsO+N7LBrbIVR1X9v3554YxGVg/3IgMoqjISbqmuJ6f67DeQ7z86od+2XXwDdoFusR/oQuhitVCo/fZSGjyULpZlMKDfIfZZdtTay6gLGqwJ/4zvkX51VaZl0wltY1C0PrdrcSsbcjuEytd5OROP7bXkHYeLrvmfRKMDfGKM9WwaapsNCPikERBjZuiSv/TMmvgLr/uAHFfXOcDSBjojQ43Y1xVOFajocPIAyU3xa17/NHPEg2ja5MU8Dh5R7iTbtuBe51oS1KWlRu2LRqA4UyQL05kDhtKird4BdUQtTrAjMUuFpXfLqjMNsAQtF8mO7+72LtLDFg4ZZ8hRqS92L6GL+0wBcirVoE6gG9SnaxxaKaFKVb2LxUG7aNxcru2aiPXGSTUx+Cv/6/BgAiqwcWYBMkuNk+pfUGORyc="
+  - secure:  "W5WZWrvTgDkj894vSt6nPDfSQr1om/TFZ4DxCoRKYrAKB1psVJukqiM4K3w4L2z10UXcQydiOctrfHM8MgGERq9ktwOviSZiFkcViF51dpn7BuBRAAMMwyS7TPTPh1w+I0+IZyUMCwPmXiEABGDtzMD+k7JVozNLHZGggfFzXL8YsE4T18lnP0mJFXFxPO/gpwsedn3kUdV9E1M+thxjf2Lpd4SoxRwglCFX8pNSIkQChB6p7IDr5AbhRW/aPxC93PYsKvTfL0PH6qM6BtyVbsc6wqyQTRE7Dp/7o9MnuEbgL36norIwRE49wX9lEtF1acJ9X9CxsC8kPmdWAYdVoncdS8/mZn7Vmujg5fp+MFcE/HIkifv0WpeD2imOELTRqlMIiDIz9V6JQtNEzKlXm5l9zjjcxKMFDjp5pq/1hyw314fjXPV7Vusm46hiYh1Q7kkqZRCzACUeEr46RIMWyHkuazN/V0h/QdwPD6P//SkhKRlkOBPJuOndq7AwaqdJZa5hJwLD2+pu3w8nx+omhc6GlOqdDQp4duU87db4zGrAcwMfl8o/mXPUSl8o6HInKpLRU2quRqOqjv1750yIdqkGrmkxVOX9+4GT2BLKDFKlzwgSKBuwFQOmjS6evazwj+fZbZr3LpDUWuhHEVIP+rnyic37i9lpwYL3dF+Un9A="
+  - COMMIT=${TRAVIS_COMMIT::7}
+
+addons:
+  sonarcloud:
+    organization: "sivaprasadreddy-github"
+    token:
+      secure: $SONAR_TOKEN
+
+script:
+- ./mvnw clean install -B
+- ./mvnw clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
+
+after_success:
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH&amp;amp;amp;amp;amp;amp;amp;lt;span data-mce-type="bookmark" style="display: inline-block; width: 0px; overflow: hidden; line-height: 0;" class="mce_SELRES_start"&amp;amp;amp;amp;amp;amp;amp;gt;&amp;amp;amp;amp;amp;amp;amp;lt;/span&amp;amp;amp;amp;amp;amp;amp;gt;; fi`
+- export IMAGE_NAME=sivaprasadreddy/freelancer-kit
+- docker build -t $IMAGE_NAME:$COMMIT .
+- docker tag $IMAGE_NAME:$COMMIT $IMAGE_NAME:$TAG
+- docker push $IMAGE_NAME
+
+deploy:
+  provider: heroku
+  api_key: 579b1762-cf85-4d0a-af44-021053594ba4
+  app: freelancer-kit
